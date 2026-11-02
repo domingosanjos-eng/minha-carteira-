@@ -50,6 +50,14 @@ img{max-width:100%;height:auto}
 @media(display-mode:standalone){
   header{padding-top:calc(18px + env(safe-area-inset-top))}
 }
+/* V25 — reorganiza os cartões de venda em telas estreitas (modo retrato). */
+@media(max-width:480px){
+  .sale{flex-wrap:wrap;align-items:flex-start;column-gap:10px;row-gap:7px}
+  .sale>.sale-info{flex:1 1 calc(100% - 62px)!important;width:calc(100% - 62px);min-width:0}
+  .sale>div:last-child{margin-left:52px;flex:1 1 calc(100% - 52px);min-width:0;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:4px 10px;text-align:left!important}
+  .sale>div:last-child>b,.sale>div:last-child>small{display:block;white-space:normal;overflow-wrap:anywhere}
+  .sale .pill{white-space:normal;line-height:1.35}
+}
 </style><style>
 @media print{
   @page{margin:12mm}
