@@ -27,7 +27,10 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
 .pill{font-size:11px;border-radius:30px;padding:5px 8px;background:var(--pink2);color:#8e4f68;white-space:nowrap}.pill.paid{background:#e7f3ed;color:#39785c}.pill.open{background:#fff1dc;color:#95681f}
 .lineitem{padding:11px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.muted{color:var(--muted);font-size:12px}.money{font-variant-numeric:tabular-nums}.totalrow{display:flex;justify-content:space-between;padding:7px 0}.divider{height:1px;background:var(--line);margin:10px 0}
 @media(min-width:600px){.modal{align-items:center}.sheet{border-radius:22px}.stats{grid-template-columns:repeat(4,1fr)}}
-</style></head>
+</style><style>
+@media print{nav,.actions button,#rfClear,#exportCsv,#printReport{display:none!important}body{background:#fff}.page{display:block!important}.panel{break-inside:avoid}.detail{display:none!important}#reportsPage{display:block!important}}
+</style>
+</head>
 <body>
 <header><div class="top"><div><div class="brand">Minha Carteira</div><div class="sub">Clientes, vendas e recebimentos em um só lugar</div></div><div style="font-size:27px">♡</div></div></header>
 <main>
@@ -67,7 +70,17 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
  <div class="section-title" style="margin-top:4px">Relatórios</div>
  <div class="stats"><div class="stat"><b id="reportTotal">R$ 0,00</b><span>Vendas totais</span></div><div class="stat"><b id="reportOpen">R$ 0,00</b><span>Vendas em aberto</span></div></div>
  <div class="section-title">Vendas em aberto</div><div class="panel" id="openSalesReport"></div>
- <div class="section-title">Vendas totais</div><div class="panel" id="allSalesReport"></div>
+ <div class="section-title">Análise detalhada</div>
+ <div class="panel">
+  <div class="row"><div class="field"><label>Carteira</label><select id="rfWallet"><option value="todas">Todas</option><option value="cosmeticos">Cosméticos e perfumaria</option><option value="pijamas">Pijamas e outros</option></select></div><div class="field"><label>Cliente</label><select id="rfClient"><option value="todos">Todos os clientes</option></select></div></div>
+  <div class="row"><div class="field"><label>De</label><input id="rfFrom" type="date"></div><div class="field"><label>Até</label><input id="rfTo" type="date"></div></div>
+  <div class="actions"><button class="btn secondary small" id="rfClear">Limpar filtros</button><button class="btn small" id="exportCsv">Exportar Excel (CSV)</button><button class="btn secondary small" id="printReport">Salvar PDF</button></div>
+ </div>
+ <div class="stats"><div class="stat"><b id="rfSold">R$ 0,00</b><span>Vendido no filtro</span></div><div class="stat"><b id="rfReceived">R$ 0,00</b><span>Recebido</span></div><div class="stat"><b id="rfDue">R$ 0,00</b><span>Em aberto</span></div></div>
+ <div class="section-title">Vendas do período</div><div class="panel" id="rfSales"></div>
+ <div class="section-title">Clientes que mais compraram</div><div class="panel" id="rfRanking"></div>
+ <div class="section-title">Produtos mais vendidos</div><div class="panel" id="rfProducts"></div>
+ <div class="section-title">Resumo mensal</div><div class="panel" id="rfMonths"></div>
 </div>
 <div id="detail" class="detail">
  <button class="back" id="back">‹ Voltar</button>
@@ -131,7 +144,39 @@ function render(){
  const saleHTML=arr=>arr.length?arr.map(s=>`<div class="sale" data-sale="${s.id}"><div class="avatar">R$</div><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='cosmeticos'?'Cosméticos':'Pijamas'} · ${(s.items||[]).length} item(ns)</small></div><div style="text-align:right"><b>${money(total(s))}</b><small class="muted">Recebido ${money(received(s))}</small><small class="pill ${balance(s)===0?'paid':'open'}">${balance(s)===0?'Quitada':money(balance(s))+' em aberto'}</small></div></div>`).join(''):'<div class="empty">Nenhuma venda encontrada.</div>';
  $('sales').innerHTML=saleHTML(filtered);document.querySelectorAll('#sales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
  let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=saleHTML(open);$('allSalesReport').innerHTML=saleHTML(ordered);document.querySelectorAll('#openSalesReport [data-sale],#allSalesReport [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+ renderAdvancedReports();
 }
+
+function reportSales(){
+ let w=$('rfWallet')?.value||'todas',c=$('rfClient')?.value||'todos',from=$('rfFrom')?.value||'',to=$('rfTo')?.value||'';
+ return sales.filter(s=>(w==='todas'||s.wallet===w)&&(c==='todos'||s.clientId===c)&&(!from||(s.date||'')>=from)&&(!to||(s.date||'')<=to));
+}
+function renderAdvancedReports(){
+ if(!$('rfSales'))return;
+ let sel=$('rfClient'),old=sel.value;sel.innerHTML='<option value="todos">Todos os clientes</option>'+clients.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join('');if([...sel.options].some(o=>o.value===old))sel.value=old;
+ let arr=reportSales(),sold=arr.reduce((a,s)=>a+total(s),0),rec=arr.reduce((a,s)=>a+received(s),0),due=arr.reduce((a,s)=>a+balance(s),0);
+ $('rfSold').textContent=money(sold);$('rfReceived').textContent=money(rec);$('rfDue').textContent=money(due);
+ let row=s=>`<div class="sale" data-sale="${s.id}"><div><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='pijamas'?'Pijamas e outros':'Cosméticos e perfumaria'}</small><small>Vendido ${money(total(s))} · Recebido ${money(received(s))} · Saldo ${money(balance(s))}</small></div><span>›</span></div>`;
+ $('rfSales').innerHTML=arr.length?arr.slice().sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(row).join(''):'<div class="empty">Nenhuma venda neste filtro.</div>';
+ document.querySelectorAll('#rfSales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+ let rank={};arr.forEach(s=>{let k=s.clientId;rank[k]=(rank[k]||0)+total(s)});let top=Object.entries(rank).sort((a,b)=>b[1]-a[1]).slice(0,10);
+ $('rfRanking').innerHTML=top.length?top.map(([id,v],i)=>`<div class="totalrow"><span>${i+1}. ${esc(clientName(id))}</span><b>${money(v)}</b></div>`).join(''):'<div class="empty">Sem dados para classificar.</div>';
+ let products={};arr.forEach(s=>(s.items||[]).forEach(i=>{let k=i.name||'Produto';if(!products[k])products[k]={qty:0,value:0};products[k].qty+=Number(i.qty)||0;products[k].value+=(Number(i.qty)||0)*(Number(i.price)||0)}));
+ let prod=Object.entries(products).sort((a,b)=>b[1].qty-a[1].qty).slice(0,15);
+ $('rfProducts').innerHTML=prod.length?prod.map(([n,v])=>`<div class="totalrow"><span>${esc(n)}<small style="display:block">${v.qty} unidade(s)</small></span><b>${money(v.value)}</b></div>`).join(''):'<div class="empty">Sem produtos no período.</div>';
+ let months={};arr.forEach(s=>{let k=(s.date||'').slice(0,7)||'Sem data';if(!months[k])months[k]={sold:0,received:0};months[k].sold+=total(s);months[k].received+=received(s)});
+ let keys=Object.keys(months).sort().reverse();
+ $('rfMonths').innerHTML=keys.length?keys.map(k=>`<div class="totalrow"><span>${k}</span><span style="text-align:right">Vendas ${money(months[k].sold)}<small style="display:block">Recebimentos ${money(months[k].received)}</small></span></div>`).join(''):'<div class="empty">Sem dados mensais.</div>';
+}
+function exportReportCSV(){
+ let arr=reportSales(),rows=[['Data','Cliente','Carteira','Produtos','Valor vendido','Recebido','Saldo']];
+ arr.forEach(s=>rows.push([s.date||'',clientName(s.clientId),s.wallet==='pijamas'?'Pijamas e outros':'Cosméticos e perfumaria',(s.items||[]).map(i=>`${i.name} (${i.qty} x ${i.price})`).join('; '),total(s).toFixed(2),received(s).toFixed(2),balance(s).toFixed(2)]));
+ let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+ let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Minha_Carteira_Relatorio.csv';a.click();URL.revokeObjectURL(url);
+}
+['rfWallet','rfClient','rfFrom','rfTo'].forEach(id=>$(id).addEventListener('change',renderAdvancedReports));
+$('rfClear').onclick=()=>{$('rfWallet').value='todas';$('rfClient').value='todos';$('rfFrom').value='';$('rfTo').value='';renderAdvancedReports()};
+$('exportCsv').onclick=exportReportCSV;$('printReport').onclick=()=>window.print();
 function showTab(tab){['home','clientsPage','salesPage','reportsPage'].forEach(id=>$(id).style.display='none');$('detail').classList.remove('show');$('saleDetail').classList.remove('show');$(tab).style.display='block';['navhome','navclients','navsales','navreports'].forEach(id=>$(id).classList.remove('selected'));({home:'navhome',clientsPage:'navclients',salesPage:'navsales',reportsPage:'navreports'})[tab]&&$(({home:'navhome',clientsPage:'navclients',salesPage:'navsales',reportsPage:'navreports'})[tab]).classList.add('selected');render();}
 function clientName(id){return clients.find(c=>c.id===id)?.name||'Cliente removido'}
 function dateBR(d){return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—'}
