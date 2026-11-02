@@ -1,7 +1,7 @@
 {
   "name": "Minha Carteira",
   "short_name": "Minha Carteira",
-  "start_url": "./",
+  "start_url": "./?versao=24",
   "display": "standalone",
   "background_color": "#fbf8f8",
   "theme_color": "#f7eef1",

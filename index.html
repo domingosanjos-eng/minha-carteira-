@@ -29,6 +29,27 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
 @media(min-width:600px){.modal{align-items:center}.sheet{border-radius:22px}.stats{grid-template-columns:repeat(4,1fr)}}
 
 .product-result{display:flex;align-items:center;gap:10px;padding:9px;border:1px solid var(--line);border-radius:12px;margin:7px 0;background:#fff;text-align:left;width:100%;color:var(--ink)}.product-result img{width:58px;height:58px;object-fit:contain;border-radius:8px;background:#faf7f8}.product-result .muted{display:block}.product-result:active{background:var(--pink2)}
+/* V24 — ajustes de adaptação para iPhone e telas estreitas */
+html{min-height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{min-height:100vh;min-height:100dvh;padding-bottom:env(safe-area-inset-bottom);overscroll-behavior-y:contain}
+header{padding-top:calc(22px + env(safe-area-inset-top))}
+main{width:100%;min-width:0}
+button,input,select,textarea{max-width:100%;touch-action:manipulation}
+button{cursor:pointer}
+.panel,.stat,.wallet,.client-info,.sale-info{min-width:0;overflow-wrap:anywhere}
+img{max-width:100%;height:auto}
+@media(max-width:380px){
+  main{padding-left:12px;padding-right:12px}
+  .stats,.wallets{gap:8px}
+  .stat,.wallet{padding:12px}
+  .stat b{font-size:19px}
+  .brand{font-size:20px}
+  .actions .btn{padding:11px 12px}
+  .row{gap:7px}
+}
+@media(display-mode:standalone){
+  header{padding-top:calc(18px + env(safe-area-inset-top))}
+}
 </style><style>
 @media print{
   @page{margin:12mm}
@@ -139,6 +160,14 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
  </form></div></div>
 <div class="modal" id="editModal"><div class="sheet"><h2 id="editTitle">Editar registro</h2><form id="editForm"><div id="editFields"></div><div class="sheet-actions"><button type="button" class="btn ghost" id="editCancel">Cancelar</button><button class="btn" type="submit">Salvar alterações</button></div></form></div></div>
 <script>
+// V24: inicia uma carteira nova apenas na primeira abertura desta versão neste aparelho.
+const APP_VERSION='24';
+if(localStorage.getItem('mc_app_version')!==APP_VERSION){
+  localStorage.removeItem('mc_clients');
+  localStorage.removeItem('mc_sales');
+  localStorage.removeItem('mc_last_backup');
+  localStorage.setItem('mc_app_version',APP_VERSION);
+}
 let wallet='cosmeticos',clients=JSON.parse(localStorage.getItem('mc_clients')||'[]'),sales=JSON.parse(localStorage.getItem('mc_sales')||'[]'),editing=null,opened=null,currentSale=null;
 const $=id=>document.getElementById(id),today=()=>new Date().toISOString().slice(0,10);
 const money=n=>(Number(n)||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
