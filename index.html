@@ -52,6 +52,8 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
   <div class="stat"><b id="homeDue">R$ 0,00</b><span>Total em aberto</span></div>
   <div class="stat"><b id="homeCount">0</b><span>Clientes cadastrados</span></div>
  </div>
+ <div class="section-title">🎂 Aniversariantes do mês</div>
+ <div class="panel" id="birthdayList"><div class="empty">Nenhum aniversariante cadastrado para este mês.</div></div>
  <div class="section-title">Cosméticos e perfumaria</div>
  <div class="stats">
   <div class="stat"><b id="cosSold">R$ 0,00</b><span>Vendas</span></div><div class="stat"><b id="cosReceived">R$ 0,00</b><span>Recebido</span></div><div class="stat"><b id="cosDue">R$ 0,00</b><span>Em aberto</span></div>
@@ -146,14 +148,20 @@ function balance(s){return Math.max(0,total(s)-received(s))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function sumWallet(w){let ss=sales.filter(x=>x.wallet===w);return {sold:ss.reduce((a,x)=>a+total(x),0),received:ss.reduce((a,x)=>a+received(x),0),due:ss.reduce((a,x)=>a+balance(x),0)};}
 function stats(){let c=sumWallet('cosmeticos'),p=sumWallet('pijamas'),all={sold:c.sold+p.sold,received:c.received+p.received,due:c.due+p.due};$('homeSold').textContent=money(all.sold);$('homeReceived').textContent=money(all.received);$('homeDue').textContent=money(all.due);$('homeCount').textContent=clients.length;$('cosSold').textContent=money(c.sold);$('cosReceived').textContent=money(c.received);$('cosDue').textContent=money(c.due);$('pijSold').textContent=money(p.sold);$('pijReceived').textContent=money(p.received);$('pijDue').textContent=money(p.due);$('reportTotal').textContent=money(all.sold);$('reportOpen').textContent=money(all.due);}
+function renderBirthdays(){
+ const month=String(new Date().getMonth()+1).padStart(2,'0');
+ const list=clients.filter(c=>c.birthday&&/^\d{4}-\d{2}-\d{2}$/.test(c.birthday)&&c.birthday.slice(5,7)===month).sort((a,b)=>a.birthday.slice(8,10).localeCompare(b.birthday.slice(8,10)));
+ $('birthdayList').innerHTML=list.length?list.map(c=>`<div class="client" data-birthday="${esc(c.id)}"><div class="avatar">🎂</div><div class="client-info"><b>${esc(c.name)}</b><small>${dateBR(c.birthday)}${c.phone?' · '+esc(c.phone):''}</small></div><span class="pill">${Number(c.birthday.slice(8,10))===new Date().getDate()?'Hoje':'Este mês'}</span></div>`).join(''):'<div class="empty">Nenhum aniversariante cadastrado para este mês.</div>';
+ document.querySelectorAll('#birthdayList [data-birthday]').forEach(el=>el.onclick=()=>showClient(el.dataset.birthday));
+}
 function render(){
- stats();let q=($('search')?.value||'').toLowerCase(),list=clients.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q));
+ stats();renderBirthdays();let q=($('search')?.value||'').toLowerCase(),list=clients.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q));
  $('clients').innerHTML=list.length?list.map(c=>`<div class="client" data-id="${c.id}"><div class="avatar">${esc((c.name||'?')[0].toUpperCase())}</div><div class="client-info"><b>${esc(c.name)}</b><small>${esc(c.phone||'Sem telefone')}</small></div><span style="color:#b66b86">›</span></div>`).join(''):'<div class="empty">Nenhum cliente encontrado. Toque em “Novo cliente” para começar.</div>';
  document.querySelectorAll('#clients .client').forEach(el=>el.onclick=()=>showClient(el.dataset.id));
  let sq=($('salesSearch')?.value||'').toLowerCase(),ordered=sales.slice().sort((a,b)=>(b.created||b.date||'').localeCompare(a.created||a.date||''));let filtered=ordered.filter(s=>(clientName(s.clientId)+' '+(s.items||[]).map(i=>i.name).join(' ')).toLowerCase().includes(sq));
  const saleHTML=arr=>arr.length?arr.map(s=>`<div class="sale" data-sale="${s.id}"><div class="avatar">R$</div><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='cosmeticos'?'Cosméticos':'Pijamas'} · ${(s.items||[]).length} item(ns)</small></div><div style="text-align:right"><b>${money(total(s))}</b><small class="muted">Recebido ${money(received(s))}</small><small class="pill ${balance(s)===0?'paid':'open'}">${balance(s)===0?'Quitada':money(balance(s))+' em aberto'}</small></div></div>`).join(''):'<div class="empty">Nenhuma venda encontrada.</div>';
  $('sales').innerHTML=saleHTML(filtered);document.querySelectorAll('#sales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
- let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=saleHTML(open);if($('allSalesReport'))$('allSalesReport').innerHTML=saleHTML(ordered);document.querySelectorAll('#openSalesReport [data-sale],#allSalesReport [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+ let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=open.length?open.map(s=>`<div class="sale" data-sale="${s.id}"><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='pijamas'?'Pijamas e outros':'Cosméticos e perfumaria'}</small><small>Venda ${money(total(s))} · Recebido ${money(received(s))} · <b>Saldo ${money(balance(s))}</b></small><button class="btn secondary small share-open-account" data-share-sale="${s.id}">Enviar pendência por WhatsApp</button></div></div>`).join(''):'<div class="empty">Nenhuma venda em aberto.</div>';document.querySelectorAll('#openSalesReport [data-sale]').forEach(el=>el.onclick=e=>{if(e.target.closest('[data-share-sale]'))return;showSale(el.dataset.sale)});document.querySelectorAll('#openSalesReport [data-share-sale]').forEach(el=>el.onclick=e=>{e.stopPropagation();shareOpenSale(el.dataset.shareSale)});
  renderAdvancedReports();
 }
 
@@ -197,6 +205,16 @@ $('clientform').onsubmit=e=>{e.preventDefault();const data={id:editing||String(D
 function showClient(id){opened=id;let c=clients.find(x=>x.id===id);['home','clientsPage','salesPage','reportsPage'].forEach(id=>$(id).style.display='none');$('saleDetail').classList.remove('show');$('detail').classList.add('show');$('davatar').textContent=c.name[0].toUpperCase();$('dname').textContent=c.name;$('dphone').textContent=c.phone||'Telefone não informado';$('dnotes').textContent=(c.birthday?'Aniversário: '+dateBR(c.birthday)+' · ':'')+(c.notes||'Sem observações.');$('edit').onclick=()=>openClientForm(c);$('customerSale').onclick=()=>openSaleForm(c.id);
  let own=sales.filter(s=>s.clientId===id&&s.wallet===wallet).sort((a,b)=>b.created.localeCompare(a.created));$('customerSales').innerHTML=own.length?own.map(s=>`<div class="sale" data-sale="${s.id}"><div class="sale-info" style="flex:1"><b>${dateBR(s.date)} · ${money(total(s))}</b><small>Recebido ${money(received(s))} · Saldo ${money(balance(s))}</small></div><span>›</span></div>`).join(''):'<div class="empty">Este cliente ainda não tem vendas nesta carteira.</div>';
  document.querySelectorAll('#customerSales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+}
+function shareOpenSale(saleId){
+ const sale=sales.find(x=>x.id===saleId);if(!sale||balance(sale)<=0)return;
+ const c=clients.find(x=>x.id===sale.clientId);if(!c)return;
+ const due=balance(sale),phone=String(c.phone||'').replace(/\D/g,'');
+ const lines=[`Olá, ${c.name}! 😊`,'Segue o resumo da sua conta em aberto:', '',`Venda de ${dateBR(sale.date)} — ${sale.wallet==='pijamas'?'Pijamas e outros':'Cosméticos e perfumaria'}`];
+ (sale.items||[]).forEach(it=>lines.push(`• ${it.name} (${it.qty} x ${money(it.price)}) = ${money(it.qty*it.price)}`));
+ lines.push('',`Total da venda: ${money(total(sale))}`,`Total recebido: ${money(received(sale))}`,`Saldo pendente: ${money(due)}`,'','Se já realizou algum pagamento que ainda não aparece, por favor me avise. Obrigada! 💗');
+ const url=phone?`https://wa.me/${phone.startsWith('55')?phone:'55'+phone}?text=${encodeURIComponent(lines.join('\n'))}`:`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
+ window.open(url,'_blank','noopener');
 }
 $('back').onclick=()=>showTab('clientsPage');
 function openSaleForm(clientId=null){let eligible=clients;if(!eligible.length){alert('Cadastre primeiro um cliente nesta carteira.');return;} $('saleClient').innerHTML=eligible.map(c=>`<option value="${c.id}" ${c.id===clientId?'selected':''}>${esc(c.name)}</option>`).join('');$('saleDateInput').value=today();$('saleNotes').value='';$('saleModal').classList.add('open');}
