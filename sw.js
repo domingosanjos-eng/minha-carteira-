@@ -1,4 +1,4 @@
-const CACHE='minha-carteira-v22';
+const CACHE='minha-carteira-v23';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
@@ -17,14 +17,12 @@ self.addEventListener('fetch',event=>{
   if(url.origin!==self.location.origin) return;
   event.respondWith((async()=>{
     const cache=await caches.open(CACHE);
-    const cached=await cache.match(event.request);
-    if(cached) return cached;
     try {
       const response=await fetch(event.request,{cache:'no-store'});
       if(response.ok) await cache.put(event.request,response.clone());
       return response;
     } catch(error) {
-      return (await cache.match('./index.html')) || Response.error();
+      return (await cache.match(event.request)) || (await cache.match('./index.html')) || Response.error();
     }
   })());
 });
