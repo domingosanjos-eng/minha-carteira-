@@ -28,7 +28,17 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
 .lineitem{padding:11px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px}.muted{color:var(--muted);font-size:12px}.money{font-variant-numeric:tabular-nums}.totalrow{display:flex;justify-content:space-between;padding:7px 0}.divider{height:1px;background:var(--line);margin:10px 0}
 @media(min-width:600px){.modal{align-items:center}.sheet{border-radius:22px}.stats{grid-template-columns:repeat(4,1fr)}}
 </style><style>
-@media print{nav,.actions button,#rfClear,#exportCsv,#printReport{display:none!important}body{background:#fff}.page{display:block!important}.panel{break-inside:avoid}.detail{display:none!important}#reportsPage{display:block!important}}
+@media print{
+  @page{margin:12mm}
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  nav,.actions button,#rfClear,#exportCsv,#printReport,.modal{display:none!important}
+  main{max-width:none!important;margin:0!important;padding:0!important}
+  .page{display:none!important}
+  #reportsPage{display:block!important}
+  #reportsPage .panel,#reportsPage .stat{box-shadow:none!important;break-inside:avoid}
+  .detail{display:none!important}
+  #reportsPage .section-title{break-after:avoid}
+}
 </style>
 </head>
 <body>
