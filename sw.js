@@ -1,4 +1,4 @@
-const CACHE='minha-carteira-v7';
+const CACHE='minha-carteira-v8';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>{
   self.skipWaiting();

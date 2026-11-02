@@ -31,24 +31,43 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
 <body>
 <header><div class="top"><div><div class="brand">Minha Carteira</div><div class="sub">Clientes, vendas e recebimentos em um só lugar</div></div><div style="font-size:27px">♡</div></div></header>
 <main>
-<div id="home">
- <div class="section-title" style="margin-top:4px">Visão geral</div>
+<div id="home" class="page">
+ <div class="section-title" style="margin-top:4px">Resumo geral</div>
  <div class="stats">
-  <div class="stat"><b id="count">0</b><span>Clientes cadastrados</span></div>
-  <div class="stat"><b id="sold">R$ 0,00</b><span>Vendas registradas</span></div>
-  <div class="stat"><b id="received">R$ 0,00</b><span>Total recebido</span></div>
-  <div class="stat"><b id="due">R$ 0,00</b><span>Saldo a receber</span></div>
+  <div class="stat"><b id="homeSold">R$ 0,00</b><span>Total de vendas</span></div>
+  <div class="stat"><b id="homeReceived">R$ 0,00</b><span>Total recebido</span></div>
+  <div class="stat"><b id="homeDue">R$ 0,00</b><span>Total em aberto</span></div>
+  <div class="stat"><b id="homeCount">0</b><span>Clientes cadastrados</span></div>
  </div>
- <div class="section-title">Escolha uma carteira</div>
- <div class="wallets">
-  <button class="wallet active" data-wallet="cosmeticos"><span class="emoji">🌸</span><strong>Cosméticos e perfumaria</strong><small>Natura + O Boticário</small></button>
-  <button class="wallet" data-wallet="pijamas"><span class="emoji">🧺</span><strong>Pijamas e outros</strong><small>Produtos cadastrados manualmente</small></button>
+ <div class="section-title">Cosméticos e perfumaria</div>
+ <div class="stats">
+  <div class="stat"><b id="cosSold">R$ 0,00</b><span>Vendas</span></div><div class="stat"><b id="cosReceived">R$ 0,00</b><span>Recebido</span></div><div class="stat"><b id="cosDue">R$ 0,00</b><span>Em aberto</span></div>
  </div>
- <div class="section-title">Clientes</div>
- <input id="search" class="search" placeholder="Buscar por nome ou telefone">
- <div class="actions"><button class="btn" id="add">+ Novo cliente</button><button class="btn secondary" id="newSale">+ Nova venda</button><button class="btn ghost" id="export">Salvar backup no iCloud</button><button class="btn ghost" id="importBackup">Restaurar backup</button><input id="backupFile" type="file" accept=".json,application/json" hidden></div>
- <div class="muted" id="backupStatus" style="margin:0 0 10px">Backup: ainda não realizado neste aparelho.</div><div class="panel" id="clients"></div>
- <div class="section-title">Vendas recentes</div><div class="panel" id="sales"></div>
+ <div class="section-title">Pijamas e outros</div>
+ <div class="stats">
+  <div class="stat"><b id="pijSold">R$ 0,00</b><span>Vendas</span></div><div class="stat"><b id="pijReceived">R$ 0,00</b><span>Recebido</span></div><div class="stat"><b id="pijDue">R$ 0,00</b><span>Em aberto</span></div>
+ </div>
+ <div class="section-title">Backup e segurança</div>
+ <div class="panel"><div class="actions"><button class="btn" id="export">Salvar backup no iCloud</button><button class="btn secondary" id="importBackup">Restaurar backup</button><input id="backupFile" type="file" accept=".json,application/json" hidden></div><div class="muted" id="backupStatus">Backup: ainda não realizado neste aparelho.</div></div>
+</div>
+<div id="clientsPage" class="page" style="display:none">
+ <div class="section-title" style="margin-top:4px">Clientes</div>
+ <input id="search" class="search" placeholder="Buscar cliente por nome ou telefone">
+ <div class="actions"><button class="btn" id="add">+ Novo cliente</button></div>
+ <div class="panel" id="clients"></div>
+</div>
+<div id="salesPage" class="page" style="display:none">
+ <div class="section-title" style="margin-top:4px">Nova venda e recebimentos</div>
+ <div class="wallets"><button class="wallet active" data-wallet="cosmeticos"><span class="emoji">🌸</span><strong>Cosméticos e perfumaria</strong><small>Natura + O Boticário</small></button><button class="wallet" data-wallet="pijamas"><span class="emoji">🧺</span><strong>Pijamas e outros</strong><small>Cadastro manual</small></button></div>
+ <div class="actions"><button class="btn" id="newSale">+ Nova venda</button></div>
+ <div class="section-title">Pesquisar vendas</div><input id="salesSearch" class="search" placeholder="Buscar por cliente ou produto">
+ <div class="panel" id="sales"></div>
+</div>
+<div id="reportsPage" class="page" style="display:none">
+ <div class="section-title" style="margin-top:4px">Relatórios</div>
+ <div class="stats"><div class="stat"><b id="reportTotal">R$ 0,00</b><span>Vendas totais</span></div><div class="stat"><b id="reportOpen">R$ 0,00</b><span>Vendas em aberto</span></div></div>
+ <div class="section-title">Vendas em aberto</div><div class="panel" id="openSalesReport"></div>
+ <div class="section-title">Vendas totais</div><div class="panel" id="allSalesReport"></div>
 </div>
 <div id="detail" class="detail">
  <button class="back" id="back">‹ Voltar</button>
@@ -71,7 +90,7 @@ nav button{border:0;background:none;color:inherit;font:inherit}nav .selected{col
  <div class="section-title">Histórico de recebimentos</div><div class="panel" id="payments"></div>
 </div>
 </main>
-<nav><button class="selected" id="navhome">⌂<br>Início</button><button id="navclients">♙<br>Clientes</button><button id="navsales">＋<br>Vendas</button><button onclick="alert('Os relatórios detalhados serão adicionados na próxima etapa.')">▤<br>Relatórios</button></nav>
+<nav><button class="selected" id="navhome">⌂<br>Início</button><button id="navclients">♙<br>Clientes</button><button id="navsales">＋<br>Vendas</button><button id="navreports">▤<br>Relatórios</button></nav>
 <div class="modal" id="modal"><div class="sheet"><h2 id="formtitle">Novo cliente</h2><form id="clientform">
  <div class="field"><label>Nome do cliente *</label><input id="name" required maxlength="80" placeholder="Nome completo"></div>
  <div class="field"><label>Telefone / WhatsApp</label><input id="phone" type="tel" placeholder="(11) 99999-9999"></div>
@@ -102,33 +121,35 @@ function total(s){return s.items.reduce((a,x)=>a+x.qty*x.price,0)}
 function received(s){return s.payments.reduce((a,p)=>a+p.amount,0)}
 function balance(s){return Math.max(0,total(s)-received(s))}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function stats(){let ss=sales.filter(s=>s.wallet===wallet);$('count').textContent=clients.length;$('sold').textContent=money(ss.reduce((a,s)=>a+total(s),0));$('received').textContent=money(ss.reduce((a,s)=>a+received(s),0));$('due').textContent=money(ss.reduce((a,s)=>a+balance(s),0));}
+function sumWallet(w){let ss=sales.filter(x=>x.wallet===w);return {sold:ss.reduce((a,x)=>a+total(x),0),received:ss.reduce((a,x)=>a+received(x),0),due:ss.reduce((a,x)=>a+balance(x),0)};}
+function stats(){let c=sumWallet('cosmeticos'),p=sumWallet('pijamas'),all={sold:c.sold+p.sold,received:c.received+p.received,due:c.due+p.due};$('homeSold').textContent=money(all.sold);$('homeReceived').textContent=money(all.received);$('homeDue').textContent=money(all.due);$('homeCount').textContent=clients.length;$('cosSold').textContent=money(c.sold);$('cosReceived').textContent=money(c.received);$('cosDue').textContent=money(c.due);$('pijSold').textContent=money(p.sold);$('pijReceived').textContent=money(p.received);$('pijDue').textContent=money(p.due);$('reportTotal').textContent=money(all.sold);$('reportOpen').textContent=money(all.due);}
 function render(){
- stats();let q=$('search').value.toLowerCase(),list=clients.filter(c=>(c.name.toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q)));
- $('clients').innerHTML=list.length?list.map(c=>`<div class="client" data-id="${c.id}"><div class="avatar">${esc(c.name[0].toUpperCase())}</div><div class="client-info"><b>${esc(c.name)}</b><small>${esc(c.phone||'Sem telefone')}</small></div><span style="color:#b66b86">›</span></div>`).join(''):'<div class="empty">Nenhum cliente cadastrado nesta carteira.<br>Toque em “Novo cliente” para começar.</div>';
- document.querySelectorAll('.client').forEach(el=>el.onclick=()=>showClient(el.dataset.id));
- let recent=sales.filter(s=>s.wallet===wallet).sort((a,b)=>b.created.localeCompare(a.created)).slice(0,8);
- $('sales').innerHTML=recent.length?recent.map(s=>`<div class="sale" data-sale="${s.id}"><div class="avatar">R$</div><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.items.length} item(ns)</small></div><div style="text-align:right"><b>${money(total(s))}</b><small class="muted">Recebido ${money(received(s))}</small><small class="pill ${balance(s)===0?'paid':'open'}">${balance(s)===0?'Quitada':money(balance(s))+' em aberto'}</small></div></div>`).join(''):'<div class="empty">Nenhuma venda registrada nesta carteira.</div>';
- document.querySelectorAll('[data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
-
+ stats();let q=($('search')?.value||'').toLowerCase(),list=clients.filter(c=>(c.name||'').toLowerCase().includes(q)||(c.phone||'').toLowerCase().includes(q));
+ $('clients').innerHTML=list.length?list.map(c=>`<div class="client" data-id="${c.id}"><div class="avatar">${esc((c.name||'?')[0].toUpperCase())}</div><div class="client-info"><b>${esc(c.name)}</b><small>${esc(c.phone||'Sem telefone')}</small></div><span style="color:#b66b86">›</span></div>`).join(''):'<div class="empty">Nenhum cliente encontrado. Toque em “Novo cliente” para começar.</div>';
+ document.querySelectorAll('#clients .client').forEach(el=>el.onclick=()=>showClient(el.dataset.id));
+ let sq=($('salesSearch')?.value||'').toLowerCase(),ordered=sales.slice().sort((a,b)=>(b.created||b.date||'').localeCompare(a.created||a.date||''));let filtered=ordered.filter(s=>(clientName(s.clientId)+' '+(s.items||[]).map(i=>i.name).join(' ')).toLowerCase().includes(sq));
+ const saleHTML=arr=>arr.length?arr.map(s=>`<div class="sale" data-sale="${s.id}"><div class="avatar">R$</div><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='cosmeticos'?'Cosméticos':'Pijamas'} · ${(s.items||[]).length} item(ns)</small></div><div style="text-align:right"><b>${money(total(s))}</b><small class="muted">Recebido ${money(received(s))}</small><small class="pill ${balance(s)===0?'paid':'open'}">${balance(s)===0?'Quitada':money(balance(s))+' em aberto'}</small></div></div>`).join(''):'<div class="empty">Nenhuma venda encontrada.</div>';
+ $('sales').innerHTML=saleHTML(filtered);document.querySelectorAll('#sales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+ let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=saleHTML(open);$('allSalesReport').innerHTML=saleHTML(ordered);document.querySelectorAll('#openSalesReport [data-sale],#allSalesReport [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
 }
+function showTab(tab){['home','clientsPage','salesPage','reportsPage'].forEach(id=>$(id).style.display='none');$('detail').classList.remove('show');$('saleDetail').classList.remove('show');$(tab).style.display='block';['navhome','navclients','navsales','navreports'].forEach(id=>$(id).classList.remove('selected'));({home:'navhome',clientsPage:'navclients',salesPage:'navsales',reportsPage:'navreports'})[tab]&&$(({home:'navhome',clientsPage:'navclients',salesPage:'navsales',reportsPage:'navreports'})[tab]).classList.add('selected');render();}
 function clientName(id){return clients.find(c=>c.id===id)?.name||'Cliente removido'}
 function dateBR(d){return d?new Date(d+'T12:00:00').toLocaleDateString('pt-BR'):'—'}
-document.querySelectorAll('.wallet').forEach(b=>b.onclick=()=>{wallet=b.dataset.wallet;document.querySelectorAll('.wallet').forEach(x=>x.classList.toggle('active',x===b));$('detail').classList.remove('show');$('saleDetail').classList.remove('show');$('home').style.display='block';render();});
+document.querySelectorAll('.wallet').forEach(b=>b.onclick=()=>{wallet=b.dataset.wallet;document.querySelectorAll('.wallet').forEach(x=>x.classList.toggle('active',x===b));});
 function openClientForm(c=null){editing=c?.id||null;$('formtitle').textContent=c?'Editar cliente':'Novo cliente';$('name').value=c?.name||'';$('phone').value=c?.phone||'';$('birthday').value=c?.birthday||'';$('origin').value=c?.origin||'';$('notes').value=c?.notes||'';$('modal').classList.add('open');}
 $('add').onclick=()=>openClientForm();$('cancel').onclick=()=>$('modal').classList.remove('open');
 $('clientform').onsubmit=e=>{e.preventDefault();const data={id:editing||String(Date.now()),wallet,name:$('name').value.trim(),phone:$('phone').value.trim(),birthday:$('birthday').value,origin:$('origin').value,notes:$('notes').value};if(editing){let i=clients.findIndex(c=>c.id===editing);clients[i]={...clients[i],...data};}else clients.push(data);save();$('modal').classList.remove('open');render();if(opened===data.id)showClient(data.id);};
-function showClient(id){opened=id;let c=clients.find(x=>x.id===id);$('home').style.display='none';$('saleDetail').classList.remove('show');$('detail').classList.add('show');$('davatar').textContent=c.name[0].toUpperCase();$('dname').textContent=c.name;$('dphone').textContent=c.phone||'Telefone não informado';$('dnotes').textContent=(c.birthday?'Aniversário: '+dateBR(c.birthday)+' · ':'')+(c.notes||'Sem observações.');$('edit').onclick=()=>openClientForm(c);$('customerSale').onclick=()=>openSaleForm(c.id);
+function showClient(id){opened=id;let c=clients.find(x=>x.id===id);['home','clientsPage','salesPage','reportsPage'].forEach(id=>$(id).style.display='none');$('saleDetail').classList.remove('show');$('detail').classList.add('show');$('davatar').textContent=c.name[0].toUpperCase();$('dname').textContent=c.name;$('dphone').textContent=c.phone||'Telefone não informado';$('dnotes').textContent=(c.birthday?'Aniversário: '+dateBR(c.birthday)+' · ':'')+(c.notes||'Sem observações.');$('edit').onclick=()=>openClientForm(c);$('customerSale').onclick=()=>openSaleForm(c.id);
  let own=sales.filter(s=>s.clientId===id&&s.wallet===wallet).sort((a,b)=>b.created.localeCompare(a.created));$('customerSales').innerHTML=own.length?own.map(s=>`<div class="sale" data-sale="${s.id}"><div class="sale-info" style="flex:1"><b>${dateBR(s.date)} · ${money(total(s))}</b><small>Recebido ${money(received(s))} · Saldo ${money(balance(s))}</small></div><span>›</span></div>`).join(''):'<div class="empty">Este cliente ainda não tem vendas nesta carteira.</div>';
  document.querySelectorAll('#customerSales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
 }
-$('back').onclick=()=>{$('detail').classList.remove('show');$('home').style.display='block';render();};
+$('back').onclick=()=>showTab('clientsPage');
 function openSaleForm(clientId=null){let eligible=clients;if(!eligible.length){alert('Cadastre primeiro um cliente nesta carteira.');return;} $('saleClient').innerHTML=eligible.map(c=>`<option value="${c.id}" ${c.id===clientId?'selected':''}>${esc(c.name)}</option>`).join('');$('saleDateInput').value=today();$('saleNotes').value='';$('saleModal').classList.add('open');}
 $('newSale').onclick=()=>openSaleForm();$('customerSale').onclick=()=>openSaleForm(opened);$('saleCancel').onclick=()=>$('saleModal').classList.remove('open');
 $('saleform').onsubmit=e=>{e.preventDefault();let s={id:String(Date.now()),wallet,clientId:$('saleClient').value,date:$('saleDateInput').value,created:new Date().toISOString(),notes:$('saleNotes').value,items:[],payments:[]};sales.push(s);save();$('saleModal').classList.remove('open');showSale(s.id);};
-function showSale(id){currentSale=id;let s=sales.find(x=>x.id===id);$('home').style.display='none';$('detail').classList.remove('show');$('saleDetail').classList.add('show');$('saleDate').textContent='Venda de '+dateBR(s.date);$('saleCustomer').textContent=clientName(s.clientId);$('saleWallet').textContent=s.wallet==='cosmeticos'?'Cosméticos e perfumaria · Natura + O Boticário':'Pijamas e outros';$('saleItems').innerHTML=s.items.length?s.items.map((x,i)=>`<div class="lineitem"><div style="flex:1"><b>${esc(x.name)}</b><div class="muted">${esc(x.brand)} · ${x.qty} × ${money(x.price)}${x.addedAt?' · incluído '+dateBR(x.addedAt):''}</div></div><div style="text-align:right"><b>${money(x.qty*x.price)}</b><br><button class="btn ghost small" onclick="editItem(${i})">Editar</button></div></div>`).join(''):'<div class="empty">Nenhum produto adicionado. Use “Adicionar produto”.</div>';$('saleTotal').textContent=money(total(s));$('saleReceived').textContent=money(received(s));$('saleBalance').textContent=money(balance(s));$('saleStatus').textContent=balance(s)===0?'Quitada':'Em aberto';$('saleStatus').className='pill '+(balance(s)===0?'paid':'open');$('payDate').value=today();$('payAmount').value='';
+function showSale(id){currentSale=id;let s=sales.find(x=>x.id===id);['home','clientsPage','salesPage','reportsPage'].forEach(id=>$(id).style.display='none');$('detail').classList.remove('show');$('saleDetail').classList.add('show');$('saleDate').textContent='Venda de '+dateBR(s.date);$('saleCustomer').textContent=clientName(s.clientId);$('saleWallet').textContent=s.wallet==='cosmeticos'?'Cosméticos e perfumaria · Natura + O Boticário':'Pijamas e outros';$('saleItems').innerHTML=s.items.length?s.items.map((x,i)=>`<div class="lineitem"><div style="flex:1"><b>${esc(x.name)}</b><div class="muted">${esc(x.brand)} · ${x.qty} × ${money(x.price)}${x.addedAt?' · incluído '+dateBR(x.addedAt):''}</div></div><div style="text-align:right"><b>${money(x.qty*x.price)}</b><br><button class="btn ghost small" onclick="editItem(${i})">Editar</button></div></div>`).join(''):'<div class="empty">Nenhum produto adicionado. Use “Adicionar produto”.</div>';$('saleTotal').textContent=money(total(s));$('saleReceived').textContent=money(received(s));$('saleBalance').textContent=money(balance(s));$('saleStatus').textContent=balance(s)===0?'Quitada':'Em aberto';$('saleStatus').className='pill '+(balance(s)===0?'paid':'open');$('payDate').value=today();$('payAmount').value='';
  $('payments').innerHTML=s.payments.length?[...s.payments].reverse().map(p=>`<div class="lineitem"><div style="flex:1"><b>${money(p.amount)}</b><div class="muted">${dateBR(p.date)} · ${esc(p.method)}</div></div><button class="btn ghost small" onclick="editPayment('${p.id}')">Editar</button></div>`).join(''):'<div class="empty">Nenhum recebimento registrado.</div>';stats();}
-$('saleBack').onclick=()=>{if(opened){showClient(opened);}else{$('saleDetail').classList.remove('show');$('home').style.display='block';render();}};
+$('saleBack').onclick=()=>{if(opened){showClient(opened);}else{showTab('salesPage');}};
 function openItem(){let s=sales.find(x=>x.id===currentSale);$('itemBrand').innerHTML=s.wallet==='cosmeticos'?'<option>Natura</option><option>O Boticário</option><option>Outro</option>':'<option>Pijama</option><option>Outros</option>'; $('itemName').value='';$('itemQty').value=1;$('itemPrice').value='';$('itemModal').classList.add('open');}
 $('addItem').onclick=openItem;$('itemCancel').onclick=()=>$('itemModal').classList.remove('open');
 $('itemform').onsubmit=e=>{e.preventDefault();let s=sales.find(x=>x.id===currentSale);s.items.push({name:$('itemName').value.trim(),brand:$('itemBrand').value,qty:Math.max(1,parseInt($('itemQty').value)||1),price:num($('itemPrice').value),addedAt:today()});save();$('itemModal').classList.remove('open');showSale(currentSale);};
@@ -143,7 +164,7 @@ $('editSale').onclick=()=>{let s=sales.find(x=>x.id===currentSale);editDialog('E
 window.editPayment=(id)=>{let s=sales.find(x=>x.id===currentSale),p=s.payments.find(x=>x.id===id);if(!p)return;editDialog('Editar recebimento',`<div class="field"><label>Valor recebido (R$)</label><input id="edPayAmount" inputmode="decimal" value="${String(p.amount).replace('.',',')}" required></div><div class="field"><label>Data do recebimento</label><input id="edPayDate" type="date" value="${p.date}" required></div><div class="field"><label>Forma de pagamento</label><select id="edPayMethod"><option ${p.method==='Pix'?'selected':''}>Pix</option><option ${p.method==='Dinheiro'?'selected':''}>Dinheiro</option><option ${p.method==='Transferência'?'selected':''}>Transferência</option><option ${p.method==='Cartão'?'selected':''}>Cartão</option><option ${p.method==='Outro'?'selected':''}>Outro</option></select></div>`,()=>{let val=num($('edPayAmount').value),date=$('edPayDate').value,other=s.payments.filter(x=>x.id!==id).reduce((a,x)=>a+x.amount,0);if(val<=0||val+other>total(s)+0.001){alert('Valor inválido ou recebimentos acima do total da venda.');return false;}if(!date){alert('Informe a data do recebimento.');return false;}p.amount=val;p.date=date;p.method=$('edPayMethod').value;save();});};
 window.editItem=(i)=>{let s=sales.find(x=>x.id===currentSale),x=s.items[i];if(!x)return;editDialog('Editar produto',`<div class="field"><label>Nome do produto</label><input id="edItemName" value="${esc(x.name)}" required></div><div class="field"><label>Quantidade</label><input id="edItemQty" type="number" min="1" step="1" value="${x.qty}" required></div><div class="field"><label>Preço unitário (R$)</label><input id="edItemPrice" inputmode="decimal" value="${String(x.price).replace('.',',')}" required></div>`,()=>{let name=$('edItemName').value.trim(),q=parseInt($('edItemQty').value)||0,v=num($('edItemPrice').value);let newTotal=s.items.reduce((a,it,j)=>a+(j===i?0:it.qty*it.price),0)+q*v;if(!name||q<1||v<0){alert('Confira os dados do produto.');return false;}if(received(s)>newTotal+0.001){alert('O total da venda não pode ficar abaixo do valor já recebido.');return false;}x.name=name;x.qty=q;x.price=v;save();});};
 $('savePayment').onclick=()=>{let s=sales.find(x=>x.id===currentSale),amount=num($('payAmount').value);if(amount<=0){alert('Informe um valor válido.');return;}if(amount>balance(s)+0.001){alert('O pagamento não pode ser maior que o saldo pendente.');return;}s.payments.push({id:String(Date.now()),amount,date:$('payDate').value||today(),method:$('payMethod').value});save();showSale(currentSale);};
-$('search').oninput=render;$('navhome').onclick=()=>{$('detail').classList.remove('show');$('saleDetail').classList.remove('show');$('home').style.display='block';render();};$('navclients').onclick=()=>$('search').focus();$('navsales').onclick=()=>openSaleForm();
+$('search').oninput=render;$('salesSearch').oninput=render;$('navhome').onclick=()=>showTab('home');$('navclients').onclick=()=>showTab('clientsPage');$('navsales').onclick=()=>showTab('salesPage');$('navreports').onclick=()=>showTab('reportsPage');
 function backupPayload(){return {app:'Minha Carteira',schemaVersion:1,exportedAt:new Date().toISOString(),clients,sales};}
 function updateBackupStatus(){let d=localStorage.getItem('mc_last_backup');$('backupStatus').textContent=d?'Último backup gerado neste aparelho: '+new Date(d).toLocaleString('pt-BR')+'.':'Backup: ainda não realizado neste aparelho.';}
 $('export').onclick=async()=>{const payload=backupPayload(),file=new File([JSON.stringify(payload,null,2)],'MinhaCarteira_backup_'+today()+'.json',{type:'application/json'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Backup Minha Carteira',text:'Salve este arquivo no iCloud Drive pelo app Arquivos.'});localStorage.setItem('mc_last_backup',new Date().toISOString());updateBackupStatus();return;}}catch(e){if(e&&e.name==='AbortError')return;}const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);localStorage.setItem('mc_last_backup',new Date().toISOString());updateBackupStatus();alert('Backup gerado. No iPhone, abra o arquivo baixado e use Compartilhar > Salvar em Arquivos > iCloud Drive.');};
