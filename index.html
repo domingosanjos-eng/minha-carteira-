@@ -215,7 +215,7 @@ function shareOpenSale(saleId){
  lines.push('',`Total da venda: ${money(total(sale))}`,`Total recebido: ${money(received(sale))}`);
  (sale.payments||[]).forEach(p=>lines.push(`Em ${dateBR(p.date)} recebido ${money(p.amount)} — ${p.method||'Não informado'}`));
  lines.push(`Saldo pendente: ${money(due)}`,'','Se já realizou algum pagamento que ainda não aparece, por favor me avise. Obrigada! 💗');
- const url=phone?`https://wa.me/${phone.startsWith('55')?phone:'55'+phone}?text=${encodeURIComponent(lines.join('\\n'))}`:`https://wa.me/?text=${encodeURIComponent(lines.join('\\n'))}`;
+ const url=phone?`https://wa.me/${phone.startsWith('55')?phone:'55'+phone}?text=${encodeURIComponent(lines.join('\n'))}`:`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
  window.open(url,'_blank','noopener');
 }
 $('back').onclick=()=>showTab('clientsPage');
