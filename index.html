@@ -143,7 +143,7 @@ function render(){
  let sq=($('salesSearch')?.value||'').toLowerCase(),ordered=sales.slice().sort((a,b)=>(b.created||b.date||'').localeCompare(a.created||a.date||''));let filtered=ordered.filter(s=>(clientName(s.clientId)+' '+(s.items||[]).map(i=>i.name).join(' ')).toLowerCase().includes(sq));
  const saleHTML=arr=>arr.length?arr.map(s=>`<div class="sale" data-sale="${s.id}"><div class="avatar">R$</div><div class="sale-info" style="flex:1"><b>${esc(clientName(s.clientId))}</b><small>${dateBR(s.date)} · ${s.wallet==='cosmeticos'?'Cosméticos':'Pijamas'} · ${(s.items||[]).length} item(ns)</small></div><div style="text-align:right"><b>${money(total(s))}</b><small class="muted">Recebido ${money(received(s))}</small><small class="pill ${balance(s)===0?'paid':'open'}">${balance(s)===0?'Quitada':money(balance(s))+' em aberto'}</small></div></div>`).join(''):'<div class="empty">Nenhuma venda encontrada.</div>';
  $('sales').innerHTML=saleHTML(filtered);document.querySelectorAll('#sales [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
- let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=saleHTML(open);$('allSalesReport').innerHTML=saleHTML(ordered);document.querySelectorAll('#openSalesReport [data-sale],#allSalesReport [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
+ let open=sales.filter(s=>balance(s)>0).sort((a,b)=>(b.date||'').localeCompare(a.date||''));$('openSalesReport').innerHTML=saleHTML(open);if($('allSalesReport'))$('allSalesReport').innerHTML=saleHTML(ordered);document.querySelectorAll('#openSalesReport [data-sale],#allSalesReport [data-sale]').forEach(el=>el.onclick=()=>showSale(el.dataset.sale));
  renderAdvancedReports();
 }
 
