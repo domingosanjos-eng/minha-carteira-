@@ -1,5 +1,30 @@
-const CACHE='minha-carteira-v2';
+const CACHE='minha-carteira-v3-1';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon.svg'];
-self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
-self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
-self.addEventListener('fetch',e=>{if(e.request.method!=='GET')return;e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(resp=>{const copy=resp.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return resp;}).catch(()=>caches.match('./index.html'))));});
+self.addEventListener('install',event=>{
+  self.skipWaiting();
+  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)));
+});
+self.addEventListener('activate',event=>{
+  event.waitUntil((async()=>{
+    const keys=await caches.keys();
+    await Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)));
+    await self.clients.claim();
+  })());
+});
+self.addEventListener('fetch',event=>{
+  if(event.request.method!=='GET') return;
+  const url=new URL(event.request.url);
+  if(url.origin!==self.location.origin) return;
+  event.respondWith((async()=>{
+    const cache=await caches.open(CACHE);
+    const cached=await cache.match(event.request);
+    if(cached) return cached;
+    try {
+      const response=await fetch(event.request,{cache:'no-store'});
+      if(response.ok) await cache.put(event.request,response.clone());
+      return response;
+    } catch(error) {
+      return (await cache.match('./index.html')) || Response.error();
+    }
+  })());
+});
