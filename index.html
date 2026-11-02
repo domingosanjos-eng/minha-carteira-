@@ -209,11 +209,13 @@ function showClient(id){opened=id;let c=clients.find(x=>x.id===id);['home','clie
 function shareOpenSale(saleId){
  const sale=sales.find(x=>x.id===saleId);if(!sale||balance(sale)<=0)return;
  const c=clients.find(x=>x.id===sale.clientId);if(!c)return;
- const due=balance(sale),phone=String(c.phone||'').replace(/\D/g,'');
+ const due=balance(sale),phone=String(c.phone||'').replace(/\\D/g,'');
  const lines=[`Olá, ${c.name}! 😊`,'Segue o resumo da sua conta em aberto:', '',`Venda de ${dateBR(sale.date)} — ${sale.wallet==='pijamas'?'Pijamas e outros':'Cosméticos e perfumaria'}`];
- (sale.items||[]).forEach(it=>lines.push(`• ${it.name} (${it.qty} x ${money(it.price)}) = ${money(it.qty*it.price)}`));
- lines.push('',`Total da venda: ${money(total(sale))}`,`Total recebido: ${money(received(sale))}`,`Saldo pendente: ${money(due)}`,'','Se já realizou algum pagamento que ainda não aparece, por favor me avise. Obrigada! 💗');
- const url=phone?`https://wa.me/${phone.startsWith('55')?phone:'55'+phone}?text=${encodeURIComponent(lines.join('\n'))}`:`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`;
+ (sale.items||[]).forEach(it=>lines.push(`${dateBR(it.addedAt||sale.date)} • ${it.name} (${it.qty} x ${money(it.price)}) = ${money(it.qty*it.price)}`));
+ lines.push('',`Total da venda: ${money(total(sale))}`,`Total recebido: ${money(received(sale))}`);
+ (sale.payments||[]).forEach(p=>lines.push(`Em ${dateBR(p.date)} recebido ${money(p.amount)} — ${p.method||'Não informado'}`));
+ lines.push(`Saldo pendente: ${money(due)}`,'','Se já realizou algum pagamento que ainda não aparece, por favor me avise. Obrigada! 💗');
+ const url=phone?`https://wa.me/${phone.startsWith('55')?phone:'55'+phone}?text=${encodeURIComponent(lines.join('\\n'))}`:`https://wa.me/?text=${encodeURIComponent(lines.join('\\n'))}`;
  window.open(url,'_blank','noopener');
 }
 $('back').onclick=()=>showTab('clientsPage');
